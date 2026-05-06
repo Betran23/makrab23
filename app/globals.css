@@ -97,6 +97,15 @@ body::before {
   }
 }
 
+@keyframes heroMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.7s ease-out forwards;
   opacity: 0;
@@ -183,4 +192,53 @@ body::before {
   position: absolute;
   opacity: 0.1;
   pointer-events: none;
+}
+
+.hero-marquee {
+  isolation: isolate;
+}
+
+.hero-marquee-track {
+  animation: heroMarquee 42s linear infinite;
+  padding-inline: 1.5rem;
+  will-change: transform;
+}
+
+.hero-photo {
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.42);
+  opacity: 0.86;
+}
+
+.hero-photo-1 {
+  width: clamp(13rem, 22vw, 24rem);
+  height: clamp(18rem, 56vh, 34rem);
+}
+
+.hero-photo-2 {
+  width: clamp(18rem, 34vw, 34rem);
+  height: clamp(12rem, 38vh, 24rem);
+}
+
+.hero-photo-3 {
+  width: clamp(14rem, 25vw, 27rem);
+  height: clamp(14rem, 44vh, 28rem);
+}
+
+.hero-photo-4 {
+  width: clamp(20rem, 38vw, 40rem);
+  height: clamp(15rem, 48vh, 30rem);
+}
+
+.hero-photo-5 {
+  width: clamp(12rem, 20vw, 22rem);
+  height: clamp(17rem, 52vh, 32rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-marquee-track {
+    animation-duration: 160s;
+  }
 }

@@ -49,7 +49,11 @@ export default function DivisionCard({
   }, [divisionId]);
 
   useEffect(() => {
-    fetchMembers();
+    const timeoutId = window.setTimeout(() => {
+      fetchMembers();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [fetchMembers]);
 
   const handleSuccess = () => {

@@ -37,7 +37,9 @@ export default function RootLayout({
       lang="id"
       className={`${playfair.variable} ${lora.variable} antialiased`}
     >
-      <body className="min-h-screen relative">{children}</body>
+      <body className="min-h-screen relative" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

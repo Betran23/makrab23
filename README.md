@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Makrab SI ITK 2023
 
-## Getting Started
+Website pendaftaran struktur kepanitiaan Makrab Sistem Informasi ITK Angkatan 2023. Aplikasi ini menampilkan informasi divisi, dokumentasi kegiatan, dan formulir pengisian anggota kepanitiaan per divisi.
 
-First, run the development server:
+## Fitur
+
+- Hero page untuk Makrab SI ITK 2023 dengan navigasi ke bagian divisi dan struktur.
+- Galeri dokumentasi dengan placeholder visual yang siap diganti dengan foto kegiatan.
+- Informasi empat divisi kepanitiaan: Perkamjin, PDD, Acara, dan KESI.
+- Kartu struktur kepanitiaan per divisi dengan PJ, slot anggota, progress pengisian, dan pencarian anggota.
+- Form pendaftaran anggota yang menyimpan data ke Supabase.
+- Validasi NIM angka-only dan pencegahan duplikasi NIM dalam divisi yang sama.
+
+## Teknologi
+
+- [Next.js](https://nextjs.org/) 16 dengan App Router
+- [React](https://react.dev/) 19
+- [Tailwind CSS](https://tailwindcss.com/) 4
+- [Supabase](https://supabase.com/) untuk database dan client API
+- TypeScript
+
+## Prasyarat
+
+- Node.js versi LTS terbaru yang kompatibel dengan Next.js 16
+- npm
+- Project Supabase dengan akses SQL editor dan anon public key
+
+## Setup Lokal
+
+1. Install dependency:
+
+   ```bash
+   npm install
+   ```
+
+2. Buat file `.env.local` di root project:
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+3. Jalankan schema database di Supabase SQL Editor:
+
+   ```sql
+   -- Lihat file supabase-schema.sql untuk schema lengkap.
+   ```
+
+4. Jalankan development server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Buka aplikasi di browser:
+
+   ```text
+   http://localhost:3000
+   ```
+
+## Konfigurasi Supabase
+
+Schema database ada di `supabase-schema.sql`. File tersebut membuat tabel `committee_members` dengan kolom:
+
+- `id`: UUID primary key.
+- `division`: salah satu dari `perkamjin`, `pdd`, `acara`, atau `konkos`.
+- `name`: nama anggota.
+- `nim`: NIM anggota.
+- `role`: `pj` atau `anggota`.
+- `created_at`: waktu data dibuat.
+
+Row Level Security sudah diaktifkan dengan policy untuk:
+
+- Membaca semua data anggota.
+- Menambahkan data baru hanya dengan role `anggota`.
+
+Index unik `unique_member_per_division` mencegah NIM yang sama terdaftar dua kali di divisi yang sama.
+
+## Script
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Menjalankan development server.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Membuat production build.
 
-## Learn More
+```bash
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+Menjalankan production server setelah build.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Menjalankan ESLint.
 
-## Deploy on Vercel
+## Struktur Project
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+app/
+  globals.css      Global style, token warna, animasi, dan Tailwind theme
+  layout.tsx       Metadata, font, dan root layout
+  page.tsx         Halaman utama
+components/
+  DivisionCard.tsx Kartu divisi, daftar anggota, progress slot, dan toast
+  DivisionInfo.tsx Informasi tiap divisi
+  GallerySection.tsx Galeri dokumentasi
+  MemberForm.tsx   Form input anggota
+lib/
+  supabase.ts      Supabase client dan type CommitteeMember
+supabase-schema.sql Schema database Supabase
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Catatan Pengembangan
+
+- Daftar divisi utama didefinisikan di `app/page.tsx`, sedangkan deskripsi divisi ada di `components/DivisionInfo.tsx`.
+- Kuota tampilan default per divisi ada di `components/DivisionCard.tsx` melalui konstanta `DEFAULT_QUOTA`.
+- PJ divisi saat ini bersifat statis di `app/page.tsx`; anggota divisi diambil dari tabel Supabase.
+- Galeri masih menggunakan placeholder. Ganti isi `galleryItems` dan markup gambar di `components/GallerySection.tsx` jika foto kegiatan sudah tersedia.
+
+## Deployment
+
+Aplikasi dapat dideploy ke Vercel atau platform lain yang mendukung Next.js. Pastikan environment variable berikut diset pada environment production:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```

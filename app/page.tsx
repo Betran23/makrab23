@@ -1,9 +1,62 @@
 "use client";
 
-import { useState } from "react";
-import GallerySection from "@/components/GallerySection";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import DivisionInfo from "@/components/DivisionInfo";
 import DivisionCard from "@/components/DivisionCard";
+import { supabase } from "@/lib/supabase";
+
+const HERO_PHOTOS_BUCKET = "gallery";
+const HERO_PHOTOS_FOLDER = "";
+
+type HeroPhoto = {
+  name: string;
+  url: string;
+};
+
+const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+
+const fallbackHeroPhotoUrls = [
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/anuvoijx34fjtygg2yev.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/bxjag15q4yfpogehhvwv.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSC01989.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSC01995.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSC02004.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSC02021.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSC02022.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0680.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0681.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0746.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0750.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0858.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0861.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0897.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0930.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF0947.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF6477.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF6571.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/DSCF6583.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/efdexohfvylikanxz2o2.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/iger9hqhrokat1nb69hk.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/IMG_6517%20(1).webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/IMG_6517.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/j6hyocfl40uin8przsni.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/optbrdwtoqsuafellzhg.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qh7rxxq83tl9xl3otbqt.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/RMRO2081.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/RMRO2107.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ws1lykbcrerzoruewjgw.webp",
+];
+
+function photoNameFromUrl(url: string) {
+  const fileName = decodeURIComponent(url.split("/").pop() || "Foto Makrab");
+  return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+}
+
+const fallbackHeroPhotos = fallbackHeroPhotoUrls.map((url) => ({
+  name: photoNameFromUrl(url),
+  url,
+}));
 
 const divisions = [
   {
@@ -19,103 +72,109 @@ const divisions = [
   {
     id: "acara" as const,
     name: "Acara",
-    pj: { name: "Micka Mayulia Utama", nim: "-" },
+    pj: { name: "Micka Mayulia Utama", nim: "10231053" },
   },
   {
     id: "konkos" as const,
-    name: "Konkos",
+    name: "KESI",
     pj: { name: "Tiya Mitra Ayu", nim: "10231088" },
   },
 ];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [heroPhotos, setHeroPhotos] =
+    useState<HeroPhoto[]>(fallbackHeroPhotos);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadHeroPhotos() {
+      if (!HERO_PHOTOS_BUCKET) {
+        return;
+      }
+
+      const { data, error } = await supabase.storage
+        .from(HERO_PHOTOS_BUCKET)
+        .list(HERO_PHOTOS_FOLDER || undefined, {
+          limit: 32,
+          sortBy: { column: "name", order: "asc" },
+        });
+
+      if (error || !data || !isMounted) {
+        return;
+      }
+
+      const photos = data
+        .filter((file) =>
+          imageExtensions.some((extension) =>
+            file.name.toLowerCase().endsWith(extension),
+          ),
+        )
+        .map((file) => {
+          const path = HERO_PHOTOS_FOLDER
+            ? `${HERO_PHOTOS_FOLDER}/${file.name}`
+            : file.name;
+          const { data: publicUrl } = supabase.storage
+            .from(HERO_PHOTOS_BUCKET)
+            .getPublicUrl(path);
+
+          return {
+            name: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+            url: publicUrl.publicUrl,
+          };
+        });
+
+      if (photos.length > 0) {
+        setHeroPhotos(photos);
+      }
+    }
+
+    loadHeroPhotos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const marqueePhotos = [...heroPhotos, ...heroPhotos];
 
   return (
     <main className="relative z-10">
       {/* ===== HERO SECTION ===== */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Top-left ornament */}
-          <svg
-            className="absolute top-10 left-10 w-32 h-32 text-[var(--color-gold)] opacity-10"
-            viewBox="0 0 100 100"
-            fill="currentColor"
-          >
-            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" />
-            <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" />
-            <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="0.5" />
-            <circle cx="50" cy="50" r="3" />
-          </svg>
-
-          {/* Bottom-right ornament */}
-          <svg
-            className="absolute bottom-20 right-10 w-40 h-40 text-[var(--color-terracotta)] opacity-[0.07]"
-            viewBox="0 0 100 100"
-            fill="currentColor"
-          >
-            <path d="M50 5 L61 39 L97 39 L68 61 L79 95 L50 73 L21 95 L32 61 L3 39 L39 39 Z" />
-          </svg>
-
-          {/* Scattered dots */}
-          <div className="absolute top-1/4 right-1/4 w-2 h-2 rounded-full bg-[var(--color-gold)] opacity-20" />
-          <div className="absolute top-1/3 left-1/3 w-1.5 h-1.5 rounded-full bg-[var(--color-terracotta)] opacity-15" />
-          <div className="absolute bottom-1/3 left-1/4 w-2.5 h-2.5 rounded-full bg-[var(--color-olive)] opacity-15" />
-          <div className="absolute top-2/3 right-1/3 w-1.5 h-1.5 rounded-full bg-[var(--color-brown)] opacity-20" />
-        </div>
-
-        {/* Hero Content */}
-        <div className="text-center max-w-4xl mx-auto relative">
-          {/* Decorative line above */}
-          <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in">
-            <div className="w-16 h-px bg-[var(--color-gold)]" />
-            <svg className="w-5 h-5 text-[var(--color-gold)]" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <div className="w-16 h-px bg-[var(--color-gold)]" />
+      <section className="hero-marquee relative min-h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-[#120d09]">
+        {heroPhotos.length > 0 && (
+          <div className="absolute inset-0 flex items-center pointer-events-none">
+            <div className="hero-marquee-track flex min-w-max items-center gap-4 sm:gap-6">
+              {marqueePhotos.map((photo, index) => (
+                <figure
+                  key={`${photo.url}-${index}`}
+                  className={`hero-photo hero-photo-${(index % 5) + 1} relative`}
+                >
+                  <Image
+                    src={photo.url}
+                    alt={photo.name}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 768px) 70vw, 34vw"
+                    className="object-cover"
+                    loading={index < heroPhotos.length ? "eager" : "lazy"}
+                  />
+                </figure>
+              ))}
+            </div>
           </div>
+        )}
 
-          {/* Main Title */}
-          <h1 className="font-[family-name:var(--font-playfair)] text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[var(--color-brown-dark)] leading-tight mb-6 animate-fade-in-up">
-            Makrab{" "}
-            <span className="text-[var(--color-terracotta)]">Sistem Informasi</span>
-            <br />
-            <span className="text-[var(--color-gold)]">ITK</span> Angkatan 2023
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.18),rgba(0,0,0,0.72)_62%,rgba(0,0,0,0.9)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/80" />
+
+        <div className="relative z-10 text-center">
+          <h1 className="font-[family-name:var(--font-playfair)] text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold leading-none text-[var(--color-warm-white)] drop-shadow-[0_14px_42px_rgba(0,0,0,0.65)] animate-fade-in-up">
+            INVICTUS 23
           </h1>
-
-          {/* Subtitle */}
-          <p className="font-[family-name:var(--font-lora)] text-lg sm:text-xl text-[var(--color-warm-gray)] max-w-2xl mx-auto mb-10 animate-fade-in-up delay-200">
-            Bangun kebersamaan, isi peranmu, dan jadi bagian dari cerita kita.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-400">
-            <a
-              href="#divisi"
-              className="px-8 py-3.5 bg-[var(--color-terracotta)] hover:bg-[var(--color-terracotta-light)] text-white font-[family-name:var(--font-lora)] font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-            >
-              Lihat Divisi
-            </a>
-            <a
-              href="#struktur"
-              className="px-8 py-3.5 border-2 border-[var(--color-gold)] text-[var(--color-gold)] hover:bg-[var(--color-gold)] hover:text-white font-[family-name:var(--font-lora)] font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5"
-            >
-              Isi Struktur Kepanitiaan
-            </a>
-          </div>
-
-          {/* Scroll indicator */}
-          <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 animate-bounce">
-            <svg className="w-6 h-6 text-[var(--color-warm-gray)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
         </div>
       </section>
-
-      {/* ===== GALLERY SECTION ===== */}
-      <GallerySection />
 
       {/* ===== DIVISION INFO SECTION ===== */}
       <DivisionInfo />
@@ -129,7 +188,8 @@ export default function Home() {
               Pohon Struktur Kepanitiaan
             </h2>
             <p className="font-[family-name:var(--font-lora)] text-[var(--color-warm-gray)] text-lg max-w-2xl mx-auto">
-              Pilih divisi, isi namamu, dan ambil bagian dalam cerita Makrab SI 2023.
+              Pilih divisi, isi namamu, dan ambil bagian dalam cerita Makrab SI
+              2023.
             </p>
             <div className="vintage-divider mt-6 max-w-xs mx-auto">
               <span className="text-[var(--color-gold)] text-xl">&#10045;</span>
@@ -177,8 +237,18 @@ export default function Home() {
                   onClick={() => setSearchQuery("")}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-warm-gray)] hover:text-[var(--color-brown-dark)] transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               )}
@@ -199,7 +269,14 @@ export default function Home() {
               {/* Vertical lines to each division */}
               <div className="flex justify-between max-w-4xl mx-auto">
                 {divisions.map((_, i) => (
-                  <div key={i} className="w-px h-8 bg-[var(--color-brown)]" style={{ marginLeft: i === 0 ? '0' : 'auto', marginRight: i === divisions.length - 1 ? '0' : 'auto' }} />
+                  <div
+                    key={i}
+                    className="w-px h-8 bg-[var(--color-brown)]"
+                    style={{
+                      marginLeft: i === 0 ? "0" : "auto",
+                      marginRight: i === divisions.length - 1 ? "0" : "auto",
+                    }}
+                  />
                 ))}
               </div>
             </div>
