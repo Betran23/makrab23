@@ -97,7 +97,7 @@ export default function Home() {
       const { data, error } = await supabase.storage
         .from(HERO_PHOTOS_BUCKET)
         .list(HERO_PHOTOS_FOLDER || undefined, {
-          limit: 32,
+          limit: 200,
           sortBy: { column: "name", order: "asc" },
         });
 

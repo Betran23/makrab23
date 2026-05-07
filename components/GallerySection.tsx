@@ -2,93 +2,103 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
-const galleryItems = [
-  {
-    id: 1,
-    label: "Dokumentasi Makrab 1",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/bytuglbpv0kpidil4f37.webp",
-  },
-  {
-    id: 2,
-    label: "Dokumentasi Makrab 2",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/c9nyqwka0xfg9xpvukbq.webp",
-  },
-  {
-    id: 3,
-    label: "Dokumentasi Makrab 3",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/dzwtr3htcb3zgy4fxtza.webp",
-  },
-  {
-    id: 4,
-    label: "Dokumentasi Makrab 4",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/eu4et0rrhknu1j7iuui5.webp",
-  },
-  {
-    id: 5,
-    label: "Dokumentasi Makrab 5",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ezg8xnxjo3zaf4kmlmrp.webp",
-  },
-  {
-    id: 6,
-    label: "Dokumentasi Makrab 6",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/hnkgnyjcq0p7fodc2bql.webp",
-  },
-  {
-    id: 7,
-    label: "Dokumentasi Makrab 7",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/nn7tndlbzahlhnfiezfa.webp",
-  },
-  {
-    id: 8,
-    label: "Dokumentasi Makrab 8",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/pe8xf2rtge9tqiplbwty.webp",
-  },
-  {
-    id: 9,
-    label: "Dokumentasi Makrab 9",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ptdksuc2uhsph7vvlwoa.webp",
-  },
-  {
-    id: 10,
-    label: "Dokumentasi Makrab 10",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qkdnphy7wjwndqehnb2o.webp",
-  },
-  {
-    id: 11,
-    label: "Dokumentasi Makrab 11",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qxqie8syqzknzyfwubt9.webp",
-  },
-  {
-    id: 12,
-    label: "Dokumentasi Makrab 12",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ssjfo8dddvvj75cduxzg.webp",
-  },
-  {
-    id: 13,
-    label: "Dokumentasi Makrab 13",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/tdbrhmf6f9fpmjlvpnng.webp",
-  },
-  {
-    id: 14,
-    label: "Dokumentasi Makrab 14",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/vkwaissl9peue2mw0bgr.webp",
-  },
-  {
-    id: 15,
-    label: "Dokumentasi Makrab 15",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/wxcpy5eeswv1nc6yf0nh.webp",
-  },
-  {
-    id: 16,
-    label: "Dokumentasi Makrab 16",
-    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/xueks4pfrmjfv06wpemh.webp",
-  },
+const GALLERY_BUCKET = "gallery";
+const GALLERY_FOLDER = "";
+
+type GalleryItem = {
+  id: number;
+  label: string;
+  src: string;
+};
+
+const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+
+const fallbackGalleryUrls = [
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/bytuglbpv0kpidil4f37.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/c9nyqwka0xfg9xpvukbq.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/dzwtr3htcb3zgy4fxtza.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/eu4et0rrhknu1j7iuui5.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ezg8xnxjo3zaf4kmlmrp.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/hnkgnyjcq0p7fodc2bql.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/nn7tndlbzahlhnfiezfa.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/pe8xf2rtge9tqiplbwty.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ptdksuc2uhsph7vvlwoa.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qkdnphy7wjwndqehnb2o.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qxqie8syqzknzyfwubt9.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ssjfo8dddvvj75cduxzg.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/tdbrhmf6f9fpmjlvpnng.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/vkwaissl9peue2mw0bgr.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/wxcpy5eeswv1nc6yf0nh.webp",
+  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/xueks4pfrmjfv06wpemh.webp",
 ];
 
+function photoLabelFromUrl(url: string) {
+  const fileName = decodeURIComponent(url.split("/").pop() || "Foto Makrab");
+  return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+}
+
+const fallbackGalleryItems = fallbackGalleryUrls.map((src, index) => ({
+  id: index + 1,
+  label: photoLabelFromUrl(src),
+  src,
+}));
+
 export default function GallerySection() {
+  const [galleryItems, setGalleryItems] =
+    useState<GalleryItem[]>(fallbackGalleryItems);
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadGalleryItems() {
+      const { data, error } = await supabase.storage
+        .from(GALLERY_BUCKET)
+        .list(GALLERY_FOLDER || undefined, {
+          limit: 200,
+          sortBy: { column: "name", order: "asc" },
+        });
+
+      if (error || !data || !isMounted) {
+        return;
+      }
+
+      const photos = data
+        .filter((file) =>
+          imageExtensions.some((extension) =>
+            file.name.toLowerCase().endsWith(extension),
+          ),
+        )
+        .map((file, index) => {
+          const path = GALLERY_FOLDER
+            ? `${GALLERY_FOLDER}/${file.name}`
+            : file.name;
+          const { data: publicUrl } = supabase.storage
+            .from(GALLERY_BUCKET)
+            .getPublicUrl(path);
+
+          return {
+            id: index + 1,
+            label: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+            src: publicUrl.publicUrl,
+          };
+        });
+
+      if (photos.length > 0) {
+        setGalleryItems(photos);
+        setVisibleItems(new Set());
+      }
+    }
+
+    loadGalleryItems();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -107,7 +117,7 @@ export default function GallerySection() {
     items?.forEach((item) => observer.observe(item));
 
     return () => observer.disconnect();
-  }, []);
+  }, [galleryItems]);
 
   return (
     <section id="dokumentasi" className="py-20 px-4 sm:px-6 lg:px-8 relative">
