@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import DivisionInfo from "@/components/DivisionInfo";
 import DivisionCard from "@/components/DivisionCard";
+import GallerySection from "@/components/GallerySection";
 import { supabase } from "@/lib/supabase";
 
 const HERO_PHOTOS_BUCKET = "gallery";
@@ -296,6 +297,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ===== GALLERY SECTION ===== */}
+      <GallerySection />
 
       {/* ===== FOOTER ===== */}
       <footer className="py-10 px-4 bg-[var(--color-brown-dark)] text-[var(--color-cream)]">
