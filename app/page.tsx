@@ -5,17 +5,18 @@ import Image from "next/image";
 import DivisionInfo from "@/components/DivisionInfo";
 import DivisionCard from "@/components/DivisionCard";
 import GallerySection from "@/components/GallerySection";
-import { supabase } from "@/lib/supabase";
-
-const HERO_PHOTOS_BUCKET = "gallery";
-const HERO_PHOTOS_FOLDER = "";
 
 type HeroPhoto = {
   name: string;
   url: string;
 };
 
-const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+type GalleryApiResponse = {
+  photos?: {
+    label: string;
+    url: string;
+  }[];
+};
 
 const fallbackHeroPhotoUrls = [
   "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/anuvoijx34fjtygg2yev.webp",
@@ -91,43 +92,24 @@ export default function Home() {
     let isMounted = true;
 
     async function loadHeroPhotos() {
-      if (!HERO_PHOTOS_BUCKET) {
+      try {
+        const response = await fetch("/api/gallery", { cache: "no-store" });
+        const data = (await response.json()) as GalleryApiResponse;
+
+        if (!response.ok || !data.photos || !isMounted) {
+          return;
+        }
+
+        const photos = data.photos.map((photo) => ({
+          name: photo.label,
+          url: photo.url,
+        }));
+
+        if (photos.length > 0) {
+          setHeroPhotos(photos);
+        }
+      } catch {
         return;
-      }
-
-      const { data, error } = await supabase.storage
-        .from(HERO_PHOTOS_BUCKET)
-        .list(HERO_PHOTOS_FOLDER || undefined, {
-          limit: 200,
-          sortBy: { column: "name", order: "asc" },
-        });
-
-      if (error || !data || !isMounted) {
-        return;
-      }
-
-      const photos = data
-        .filter((file) =>
-          imageExtensions.some((extension) =>
-            file.name.toLowerCase().endsWith(extension),
-          ),
-        )
-        .map((file) => {
-          const path = HERO_PHOTOS_FOLDER
-            ? `${HERO_PHOTOS_FOLDER}/${file.name}`
-            : file.name;
-          const { data: publicUrl } = supabase.storage
-            .from(HERO_PHOTOS_BUCKET)
-            .getPublicUrl(path);
-
-          return {
-            name: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-            url: publicUrl.publicUrl,
-          };
-        });
-
-      if (photos.length > 0) {
-        setHeroPhotos(photos);
       }
     }
 

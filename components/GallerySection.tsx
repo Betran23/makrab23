@@ -2,10 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/lib/supabase";
-
-const GALLERY_BUCKET = "gallery";
-const GALLERY_FOLDER = "";
 
 type GalleryItem = {
   id: number;
@@ -13,7 +9,14 @@ type GalleryItem = {
   src: string;
 };
 
-const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+type GalleryApiResponse = {
+  photos?: {
+    id: number;
+    label: string;
+    url: string;
+  }[];
+  error?: string;
+};
 
 export default function GallerySection() {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
@@ -26,45 +29,35 @@ export default function GallerySection() {
     let isMounted = true;
 
     async function loadGalleryItems() {
-      const { data, error } = await supabase.storage
-        .from(GALLERY_BUCKET)
-        .list(GALLERY_FOLDER || undefined, {
-          limit: 200,
-          sortBy: { column: "name", order: "asc" },
-        });
+      try {
+        const response = await fetch("/api/gallery", { cache: "no-store" });
+        const data = (await response.json()) as GalleryApiResponse;
 
-      if (error || !data || !isMounted) {
+        if (!response.ok || !data.photos || !isMounted) {
+          if (isMounted) {
+            setLoadError(
+              data.error || "Gagal memuat foto dari bucket gallery.",
+            );
+            setLoading(false);
+          }
+          return;
+        }
+
+        const photos = data.photos.map((photo) => ({
+          id: photo.id,
+          label: photo.label,
+          src: photo.url,
+        }));
+
+        setGalleryItems(photos);
+        setVisibleItems(new Set());
+        setLoading(false);
+      } catch {
         if (isMounted) {
           setLoadError("Gagal memuat foto dari bucket gallery.");
           setLoading(false);
         }
-        return;
       }
-
-      const photos = data
-        .filter((file) =>
-          imageExtensions.some((extension) =>
-            file.name.toLowerCase().endsWith(extension),
-          ),
-        )
-        .map((file, index) => {
-          const path = GALLERY_FOLDER
-            ? `${GALLERY_FOLDER}/${file.name}`
-            : file.name;
-          const { data: publicUrl } = supabase.storage
-            .from(GALLERY_BUCKET)
-            .getPublicUrl(path);
-
-          return {
-            id: index + 1,
-            label: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-            src: publicUrl.publicUrl,
-          };
-        });
-
-      setGalleryItems(photos);
-      setVisibleItems(new Set());
-      setLoading(false);
     }
 
     loadGalleryItems();
