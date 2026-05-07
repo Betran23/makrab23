@@ -1,11 +1,11 @@
 # Makrab SI ITK 2023
 
-Website pendaftaran struktur kepanitiaan Makrab Sistem Informasi ITK Angkatan 2023. Aplikasi ini menampilkan informasi divisi, dokumentasi kegiatan, dan formulir pengisian anggota kepanitiaan per divisi.
+Website pendaftaran struktur kepanitiaan Makrab Sistem Informasi ITK Angkatan 2023. Aplikasi ini menampilkan informasi divisi, dokumentasi kegiatan di hero, dan formulir pengisian anggota kepanitiaan per divisi.
 
 ## Fitur
 
 - Hero page untuk Makrab SI ITK 2023 dengan navigasi ke bagian divisi dan struktur.
-- Galeri dokumentasi yang membaca foto dari bucket Supabase `gallery`.
+- Hero photo marquee berbentuk collage/mosaic yang membaca foto dari bucket Supabase `gallery`.
 - Halaman admin upload gallery dengan drag-and-drop, konversi WebP, dan kompresi otomatis.
 - Informasi empat divisi kepanitiaan: Perkamjin, PDD, Acara, dan KESI.
 - Kartu struktur kepanitiaan per divisi dengan PJ, slot anggota, progress pengisian, dan pencarian anggota.
@@ -95,7 +95,7 @@ Cara kerja:
 - File diproses di browser menjadi WebP, sisi terpanjang maksimal 1280px, quality 0.72.
 - Masukkan password sesuai `GALLERY_UPLOAD_PASSWORD`.
 - Klik `Upload antrean`; setiap file akan diupload ke bucket `gallery`.
-- Setelah upload, halaman utama akan membaca foto baru dari bucket untuk hero dan section dokumentasi.
+- Setelah upload, halaman utama akan membaca foto baru dari bucket untuk photo marquee hero.
 
 ## Script
 
@@ -135,7 +135,6 @@ app/
 components/
   DivisionCard.tsx Kartu divisi, daftar anggota, progress slot, dan toast
   DivisionInfo.tsx Informasi tiap divisi
-  GallerySection.tsx Galeri dokumentasi dari bucket Supabase
   GalleryUploader.tsx UI drag-and-drop, WebP compression, dan upload queue
   MemberForm.tsx   Form input anggota
 lib/
@@ -149,7 +148,7 @@ supabase-schema.sql Schema database Supabase
 - Daftar divisi utama didefinisikan di `app/page.tsx`, sedangkan deskripsi divisi ada di `components/DivisionInfo.tsx`.
 - Kuota tampilan default per divisi ada di `components/DivisionCard.tsx` melalui konstanta `DEFAULT_QUOTA`.
 - PJ divisi saat ini bersifat statis di `app/page.tsx`; anggota divisi diambil dari tabel Supabase.
-- `components/GallerySection.tsx` membaca daftar file langsung dari bucket `gallery`.
+- Hero di `app/page.tsx` membaca daftar file langsung dari `/api/gallery`.
 
 ## Deployment
 

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import DivisionInfo from "@/components/DivisionInfo";
 import DivisionCard from "@/components/DivisionCard";
-import GallerySection from "@/components/GallerySection";
 
 type HeroPhoto = {
   name: string;
@@ -120,32 +119,47 @@ export default function Home() {
     };
   }, []);
 
-  const marqueePhotos = [...heroPhotos, ...heroPhotos];
+  const marqueePhotos = [...heroPhotos, ...heroPhotos, ...heroPhotos];
+  const collageRows = [0, 1, 2, 3];
 
   return (
     <main className="relative z-10">
       {/* ===== HERO SECTION ===== */}
       <section className="hero-marquee relative min-h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-[#120d09]">
         {heroPhotos.length > 0 && (
-          <div className="absolute inset-0 flex items-center pointer-events-none">
-            <div className="hero-marquee-track flex min-w-max items-center gap-4 sm:gap-6">
-              {marqueePhotos.map((photo, index) => (
-                <figure
-                  key={`${photo.url}-${index}`}
-                  className={`hero-photo hero-photo-${(index % 5) + 1} relative`}
-                >
-                  <Image
-                    src={photo.url}
-                    alt={photo.name}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 768px) 70vw, 34vw"
-                    className="object-cover"
-                    loading={index < heroPhotos.length ? "eager" : "lazy"}
-                  />
-                </figure>
-              ))}
-            </div>
+          <div className="hero-collage pointer-events-none">
+            {collageRows.map((row) => (
+              <div
+                key={row}
+                className={`hero-collage-row hero-collage-row-${row + 1}`}
+              >
+                {marqueePhotos.map((photo, index) => (
+                  <figure
+                    key={`${photo.url}-${row}-${index}`}
+                    className={`hero-collage-tile hero-collage-tile-${
+                      ((index + row * 2) % 8) + 1
+                    } relative`}
+                  >
+                    <Image
+                      src={photo.url}
+                      alt={photo.name}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 768px) 42vw, 18vw"
+                      className="object-cover"
+                      loading={
+                        row === 0 && index < heroPhotos.length
+                          ? "eager"
+                          : "lazy"
+                      }
+                    />
+                  </figure>
+                ))}
+              </div>
+            ))}
+
+            <div className="hero-contact-lines" />
+            <div className="hero-contact-lines hero-contact-lines-offset" />
           </div>
         )}
 
@@ -279,9 +293,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ===== GALLERY SECTION ===== */}
-      <GallerySection />
 
       {/* ===== FOOTER ===== */}
       <footer className="py-10 px-4 bg-[var(--color-brown-dark)] text-[var(--color-cream)]">

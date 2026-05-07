@@ -198,47 +198,117 @@ body::before {
   isolation: isolate;
 }
 
-.hero-marquee-track {
-  animation: heroMarquee 42s linear infinite;
-  padding-inline: 1.5rem;
+.hero-collage {
+  position: absolute;
+  inset: -10vh -12vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.6vw, 1.25rem);
+  opacity: 0.78;
+  transform: rotate(-4deg) scale(1.08);
+  transform-origin: center;
+}
+
+.hero-collage-row {
+  display: flex;
+  width: max-content;
+  min-width: max-content;
+  align-items: center;
+  gap: clamp(0.45rem, 1.2vw, 1rem);
+  animation: heroMarquee 72s linear infinite;
   will-change: transform;
 }
 
-.hero-photo {
+.hero-collage-row-1 {
+  margin-left: -8vw;
+}
+
+.hero-collage-row-2 {
+  margin-left: -24vw;
+  animation-duration: 86s;
+  animation-direction: reverse;
+}
+
+.hero-collage-row-3 {
+  margin-left: -14vw;
+  animation-duration: 78s;
+}
+
+.hero-collage-row-4 {
+  margin-left: -34vw;
+  animation-duration: 92s;
+  animation-direction: reverse;
+}
+
+.hero-collage-tile {
   flex: 0 0 auto;
   overflow: hidden;
-  border-radius: 0.75rem;
-  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.42);
-  opacity: 0.86;
+  border: 1px solid rgba(255, 253, 247, 0.14);
+  border-radius: 0.28rem;
+  background: rgba(0, 0, 0, 0.22);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.34);
+  will-change: transform;
 }
 
-.hero-photo-1 {
-  width: clamp(13rem, 22vw, 24rem);
-  height: clamp(18rem, 56vh, 34rem);
+.hero-collage-tile-1 {
+  width: clamp(8.5rem, 14vw, 15rem);
+  height: clamp(6.5rem, 10vw, 11rem);
 }
 
-.hero-photo-2 {
-  width: clamp(18rem, 34vw, 34rem);
-  height: clamp(12rem, 38vh, 24rem);
+.hero-collage-tile-2 {
+  width: clamp(6.5rem, 10vw, 11rem);
+  height: clamp(8.5rem, 13vw, 14rem);
 }
 
-.hero-photo-3 {
-  width: clamp(14rem, 25vw, 27rem);
-  height: clamp(14rem, 44vh, 28rem);
+.hero-collage-tile-3 {
+  width: clamp(10rem, 18vw, 19rem);
+  height: clamp(7rem, 11vw, 12rem);
 }
 
-.hero-photo-4 {
-  width: clamp(20rem, 38vw, 40rem);
-  height: clamp(15rem, 48vh, 30rem);
+.hero-collage-tile-4 {
+  width: clamp(7.5rem, 12vw, 13rem);
+  height: clamp(7.5rem, 12vw, 13rem);
 }
 
-.hero-photo-5 {
-  width: clamp(12rem, 20vw, 22rem);
-  height: clamp(17rem, 52vh, 32rem);
+.hero-collage-tile-5 {
+  width: clamp(11rem, 20vw, 21rem);
+  height: clamp(8rem, 12vw, 13rem);
+}
+
+.hero-collage-tile-6 {
+  width: clamp(6.5rem, 11vw, 12rem);
+  height: clamp(9.5rem, 15vw, 16rem);
+}
+
+.hero-collage-tile-7 {
+  width: clamp(9rem, 16vw, 17rem);
+  height: clamp(6rem, 9vw, 10rem);
+}
+
+.hero-collage-tile-8 {
+  width: clamp(8rem, 13vw, 14rem);
+  height: clamp(10rem, 16vw, 17rem);
+}
+
+.hero-contact-lines {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(255, 253, 247, 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 253, 247, 0.28) 1px, transparent 1px);
+  background-size: clamp(7rem, 13vw, 14rem) clamp(6rem, 11vw, 12rem);
+  mix-blend-mode: screen;
+}
+
+.hero-contact-lines-offset {
+  opacity: 0.08;
+  transform: translate(3.5rem, 2.75rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-marquee-track {
+  .hero-collage-row {
     animation-duration: 160s;
   }
 }
