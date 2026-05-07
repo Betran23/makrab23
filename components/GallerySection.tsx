@@ -1,14 +1,89 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const galleryItems = [
-  { id: 1, label: "Dokumentasi Makrab 1" },
-  { id: 2, label: "Dokumentasi Makrab 2" },
-  { id: 3, label: "Dokumentasi Makrab 3" },
-  { id: 4, label: "Dokumentasi Makrab 4" },
-  { id: 5, label: "Dokumentasi Makrab 5" },
-  { id: 6, label: "Dokumentasi Makrab 6" },
+  {
+    id: 1,
+    label: "Dokumentasi Makrab 1",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/bytuglbpv0kpidil4f37.webp",
+  },
+  {
+    id: 2,
+    label: "Dokumentasi Makrab 2",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/c9nyqwka0xfg9xpvukbq.webp",
+  },
+  {
+    id: 3,
+    label: "Dokumentasi Makrab 3",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/dzwtr3htcb3zgy4fxtza.webp",
+  },
+  {
+    id: 4,
+    label: "Dokumentasi Makrab 4",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/eu4et0rrhknu1j7iuui5.webp",
+  },
+  {
+    id: 5,
+    label: "Dokumentasi Makrab 5",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ezg8xnxjo3zaf4kmlmrp.webp",
+  },
+  {
+    id: 6,
+    label: "Dokumentasi Makrab 6",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/hnkgnyjcq0p7fodc2bql.webp",
+  },
+  {
+    id: 7,
+    label: "Dokumentasi Makrab 7",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/nn7tndlbzahlhnfiezfa.webp",
+  },
+  {
+    id: 8,
+    label: "Dokumentasi Makrab 8",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/pe8xf2rtge9tqiplbwty.webp",
+  },
+  {
+    id: 9,
+    label: "Dokumentasi Makrab 9",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ptdksuc2uhsph7vvlwoa.webp",
+  },
+  {
+    id: 10,
+    label: "Dokumentasi Makrab 10",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qkdnphy7wjwndqehnb2o.webp",
+  },
+  {
+    id: 11,
+    label: "Dokumentasi Makrab 11",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qxqie8syqzknzyfwubt9.webp",
+  },
+  {
+    id: 12,
+    label: "Dokumentasi Makrab 12",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ssjfo8dddvvj75cduxzg.webp",
+  },
+  {
+    id: 13,
+    label: "Dokumentasi Makrab 13",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/tdbrhmf6f9fpmjlvpnng.webp",
+  },
+  {
+    id: 14,
+    label: "Dokumentasi Makrab 14",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/vkwaissl9peue2mw0bgr.webp",
+  },
+  {
+    id: 15,
+    label: "Dokumentasi Makrab 15",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/wxcpy5eeswv1nc6yf0nh.webp",
+  },
+  {
+    id: 16,
+    label: "Dokumentasi Makrab 16",
+    src: "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/xueks4pfrmjfv06wpemh.webp",
+  },
 ];
 
 export default function GallerySection() {
@@ -68,57 +143,13 @@ export default function GallerySection() {
             >
               {/* Placeholder Image */}
               <div className="aspect-[4/3] bg-gradient-to-br from-[var(--color-beige)] to-[var(--color-cream-dark)] relative overflow-hidden">
-                {/* Decorative pattern */}
-                <div className="absolute inset-0 opacity-10">
-                  <svg
-                    className="w-full h-full"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                  >
-                    <pattern
-                      id={`pattern-${item.id}`}
-                      x="0"
-                      y="0"
-                      width="20"
-                      height="20"
-                      patternUnits="userSpaceOnUse"
-                    >
-                      <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                    </pattern>
-                    <rect
-                      width="100"
-                      height="100"
-                      fill={`url(#pattern-${item.id})`}
-                      className="text-[var(--color-brown)]"
-                    />
-                  </svg>
-                </div>
-
-                {/* Camera icon placeholder */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--color-brown)] opacity-40 group-hover:opacity-60 transition-opacity">
-                  <svg
-                    className="w-12 h-12 mb-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  <span className="text-sm font-[family-name:var(--font-lora)]">
-                    {item.label}
-                  </span>
-                </div>
+                <Image
+                  src={item.src}
+                  alt={item.label}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
 
                 {/* Hover zoom overlay */}
                 <div className="absolute inset-0 bg-[var(--color-terracotta)] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
