@@ -15,39 +15,10 @@ type GalleryItem = {
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"];
 
-const fallbackGalleryUrls = [
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/bytuglbpv0kpidil4f37.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/c9nyqwka0xfg9xpvukbq.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/dzwtr3htcb3zgy4fxtza.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/eu4et0rrhknu1j7iuui5.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ezg8xnxjo3zaf4kmlmrp.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/hnkgnyjcq0p7fodc2bql.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/nn7tndlbzahlhnfiezfa.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/pe8xf2rtge9tqiplbwty.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ptdksuc2uhsph7vvlwoa.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qkdnphy7wjwndqehnb2o.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/qxqie8syqzknzyfwubt9.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/ssjfo8dddvvj75cduxzg.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/tdbrhmf6f9fpmjlvpnng.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/vkwaissl9peue2mw0bgr.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/wxcpy5eeswv1nc6yf0nh.webp",
-  "https://rqxweqkpplzwjlvudgyq.supabase.co/storage/v1/object/public/gallery/xueks4pfrmjfv06wpemh.webp",
-];
-
-function photoLabelFromUrl(url: string) {
-  const fileName = decodeURIComponent(url.split("/").pop() || "Foto Makrab");
-  return fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-}
-
-const fallbackGalleryItems = fallbackGalleryUrls.map((src, index) => ({
-  id: index + 1,
-  label: photoLabelFromUrl(src),
-  src,
-}));
-
 export default function GallerySection() {
-  const [galleryItems, setGalleryItems] =
-    useState<GalleryItem[]>(fallbackGalleryItems);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +34,10 @@ export default function GallerySection() {
         });
 
       if (error || !data || !isMounted) {
+        if (isMounted) {
+          setLoadError("Gagal memuat foto dari bucket gallery.");
+          setLoading(false);
+        }
         return;
       }
 
@@ -87,10 +62,9 @@ export default function GallerySection() {
           };
         });
 
-      if (photos.length > 0) {
-        setGalleryItems(photos);
-        setVisibleItems(new Set());
-      }
+      setGalleryItems(photos);
+      setVisibleItems(new Set());
+      setLoading(false);
     }
 
     loadGalleryItems();
@@ -136,48 +110,73 @@ export default function GallerySection() {
         </div>
 
         {/* Gallery Grid */}
-        <div
-          ref={containerRef}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {galleryItems.map((item, index) => (
-            <div
-              key={item.id}
-              data-id={item.id}
-              className={`group relative overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer ${
-                visibleItems.has(item.id)
-                  ? "animate-fade-in-up"
-                  : "opacity-0"
-              }`}
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Placeholder Image */}
-              <div className="aspect-[4/3] bg-gradient-to-br from-[var(--color-beige)] to-[var(--color-cream-dark)] relative overflow-hidden">
-                <Image
-                  src={item.src}
-                  alt={item.label}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+        {loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="aspect-[4/3] rounded-2xl skeleton shadow-md"
+              />
+            ))}
+          </div>
+        )}
 
-                {/* Hover zoom overlay */}
-                <div className="absolute inset-0 bg-[var(--color-terracotta)] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+        {!loading && loadError && (
+          <div className="rounded-2xl border border-[var(--color-beige)] bg-[var(--color-warm-white)] px-6 py-10 text-center shadow-sm">
+            <p className="font-[family-name:var(--font-lora)] text-[var(--color-terracotta)]">
+              {loadError}
+            </p>
+          </div>
+        )}
+
+        {!loading && !loadError && galleryItems.length === 0 && (
+          <div className="rounded-2xl border border-[var(--color-beige)] bg-[var(--color-warm-white)] px-6 py-10 text-center shadow-sm">
+            <p className="font-[family-name:var(--font-lora)] text-[var(--color-warm-gray)]">
+              Belum ada foto di bucket gallery.
+            </p>
+          </div>
+        )}
+
+        {!loading && !loadError && galleryItems.length > 0 && (
+          <div
+            ref={containerRef}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {galleryItems.map((item, index) => (
+              <div
+                key={item.id}
+                data-id={item.id}
+                className={`group relative overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer ${
+                  visibleItems.has(item.id)
+                    ? "animate-fade-in-up"
+                    : "opacity-0"
+                }`}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="aspect-[4/3] bg-gradient-to-br from-[var(--color-beige)] to-[var(--color-cream-dark)] relative overflow-hidden">
+                  <Image
+                    src={item.src}
+                    alt={item.label}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+
+                  <div className="absolute inset-0 bg-[var(--color-terracotta)] opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <p className="text-white text-sm font-[family-name:var(--font-lora)]">
+                    {item.label}
+                  </p>
+                </div>
+
+                <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-[var(--color-gold)] opacity-0 group-hover:opacity-60 transition-opacity duration-300 rounded-tr-lg" />
+                <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-[var(--color-gold)] opacity-0 group-hover:opacity-60 transition-opacity duration-300 rounded-bl-lg" />
               </div>
-
-              {/* Label */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <p className="text-white text-sm font-[family-name:var(--font-lora)]">
-                  {item.label}
-                </p>
-              </div>
-
-              {/* Corner decoration */}
-              <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-[var(--color-gold)] opacity-0 group-hover:opacity-60 transition-opacity duration-300 rounded-tr-lg" />
-              <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-[var(--color-gold)] opacity-0 group-hover:opacity-60 transition-opacity duration-300 rounded-bl-lg" />
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

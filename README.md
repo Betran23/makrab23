@@ -149,7 +149,7 @@ supabase-schema.sql Schema database Supabase
 - Daftar divisi utama didefinisikan di `app/page.tsx`, sedangkan deskripsi divisi ada di `components/DivisionInfo.tsx`.
 - Kuota tampilan default per divisi ada di `components/DivisionCard.tsx` melalui konstanta `DEFAULT_QUOTA`.
 - PJ divisi saat ini bersifat statis di `app/page.tsx`; anggota divisi diambil dari tabel Supabase.
-- `components/GallerySection.tsx` punya fallback URL, tetapi akan memakai daftar file bucket `gallery` jika Supabase berhasil diakses.
+- `components/GallerySection.tsx` membaca daftar file langsung dari bucket `gallery`.
 
 ## Deployment
 
